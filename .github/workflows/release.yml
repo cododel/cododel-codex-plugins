@@ -35,14 +35,21 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
+      - name: Freeze release tooling from workflow commit
+        run: |
+          tooling="$RUNNER_TEMP/cododel-release-tooling"
+          mkdir -p "$tooling"
+          cp -R scripts "$tooling/scripts"
+          echo "RELEASE_TOOLING=$tooling" >> "$GITHUB_ENV"
+          echo "RELEASE_WORKSPACE=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
       - name: Resolve new release or resume existing tag
         id: release
         run: |
-          bun scripts/ci.ts validate
-          bun scripts/release/run.ts inspect
+          bun "$RELEASE_TOOLING/scripts/ci.ts" validate
+          bun "$RELEASE_TOOLING/scripts/release/run.ts" inspect
       - name: Validate selected source
         if: steps.release.outputs.done != 'true'
-        run: bun scripts/ci.ts releaseCheck "$RELEASE_PLUGIN"
+        run: bun "$RELEASE_TOOLING/scripts/ci.ts" releaseCheck "$RELEASE_PLUGIN"
       - name: Prepare version commit
         if: steps.release.outputs.done != 'true'
         env:
@@ -51,10 +58,10 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          bun scripts/release/run.ts prepare
+          bun "$RELEASE_TOOLING/scripts/release/run.ts" prepare
       - name: Build selected release
         if: steps.release.outputs.done != 'true'
-        run: bun scripts/ci.ts releaseBuild "$RELEASE_PLUGIN"
+        run: bun "$RELEASE_TOOLING/scripts/ci.ts" releaseBuild "$RELEASE_PLUGIN"
       - name: Publish release and marketplace
         if: steps.release.outputs.done != 'true'
         env:
@@ -62,9 +69,9 @@ jobs:
           RELEASE_RESUME: ${{ steps.release.outputs.resume }}
         run: |
           gh auth setup-git --hostname github.com
-          bun scripts/release/run.ts publish
+          bun "$RELEASE_TOOLING/scripts/release/run.ts" publish
       - name: Resume marketplace publication
         if: steps.release.outputs.done == 'true'
         run: |
           gh auth setup-git --hostname github.com
-          bun scripts/release/run.ts catalog
+          bun "$RELEASE_TOOLING/scripts/release/run.ts" catalog

@@ -9,7 +9,7 @@ export interface Plugin {
   sharedInputs: string[];
   commands: Record<string, string[][]>;
 }
-export const root = resolve(import.meta.dir, "..");
+export const root = process.env.RELEASE_WORKSPACE ? resolve(process.env.RELEASE_WORKSPACE) : resolve(import.meta.dir, "..");
 export function plugins(): Plugin[] {
   const data = JSON.parse(readFileSync(resolve(root, "plugins.json"), "utf8"));
   if (data.schema !== 1 || !Array.isArray(data.plugins) || !data.plugins.length) throw new Error("Invalid plugin registry");
