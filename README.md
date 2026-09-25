@@ -1,41 +1,31 @@
-# Cododel marketplace
+# Cododel Codex plugins
 
-Каталог плагинов для Codex. Пакеты хранятся в `plugins/`, индекс — в `.agents/plugins/marketplace.json`.
+This repository develops and publishes Codex plugins. `main` contains source and CI. The `marketplace` branch contains tested installable packages and `.agents/plugins/marketplace.json`.
 
-## Подключение
+## Install
 
-В Codex откройте **Add plugin marketplace** и укажите в **Source** абсолютный путь к этой папке. Для текущего локального каталога:
+In Codex **Add plugin marketplace**, set Source to `git@github.com:cododel/cododel-codex-plugins.git`, Git ref to `marketplace`, and leave Sparse paths empty. The marketplace name remains `cododel`; Blueprint's plugin name remains `blueprint-plugin`.
 
-```text
-/Users/cododel/Projects/cododel-codex-plugins
-```
+Existing installs that used Git ref `main` need a one-time switch to `marketplace`. Refresh or reinstall the plugin using Codex's normal plugin interface, then test it in a new task. The original standalone Blueprint repository remains available as historical source; ongoing changes belong here.
 
-Затем установите **Blueprint** из marketplace **Cododel**. Это отдельный источник от ранее загруженного ZIP; облачная карточка ZIP этим каталогом не управляется.
+## Develop
 
-Для подключения из GitHub укажите Source `git@github.com:cododel/cododel-codex-plugins.git` и Git ref `main`. Репозиторий: https://github.com/cododel/cododel-codex-plugins.
-
-## Пакеты
-
-| Плагин | Версия | Платформа |
-| --- | --- | --- |
-| Blueprint (`blueprint-plugin`) | 0.1.2 | macOS Apple Silicon (arm64) |
-
-В пакет включён executable с Bun и готовый интерфейс. Пользователю не нужно устанавливать Node.js, Bun или npm-зависимости. Intel macOS, Linux и Windows этой сборкой не поддерживаются.
-
-## Проверка
-
-Из корня каталога:
+`plugins.json` lists plugin IDs, package names, directories, runners, commands and shared build inputs. Blueprint lives in `plugins/blueprint`. Its dependencies and lockfile are local to that directory. From the repository root:
 
 ```sh
-python3 scripts/validate.py
+bun scripts/ci.ts validate
+bun test tests/ci.test.ts tests/release.test.ts
+bun scripts/ci.ts check blueprint
 ```
 
-Проверка сверяет структуру каталога, конфигурацию MCP, исполняемый файл и SHA-256 всех файлов пакетов. Контрольные суммы фиксируют состав сборки; они не являются цифровой подписью.
+On pull requests and pushes to `main`, CI checks only affected plugins. A shared input checks its consumers. When Git history cannot establish a comparison base, CI checks all plugins. Root documentation changes run only the registry and routing tests. Each plugin has its own version and release.
 
-## Публикация обновлений
+## Release
 
-Исходники Blueprint и его release workflow находятся в отдельном проекте. Этот каталог содержит готовые пакеты для установки. Версия меняется при выпуске релиза, а не при каждом коммите разработки.
+Use **Actions → Release plugin → Run workflow** on `main` with plugin ID and next version, e.g. `blueprint` and `0.1.3`. Ordinary commits do not change plugin versions. The workflow checks only the selected plugin, creates a version-only commit and `blueprint/v0.1.3`, builds a ZIP, verifies its extracted MCP server, and publishes **Blueprint 0.1.3** in GitHub Releases. It then downloads the same release archive and publishes a new `marketplace` snapshot. No second compilation occurs for the catalog. The release needs the repository's built-in `GITHUB_TOKEN` with `contents: write` and branch protection that permits this release commit.
 
-При выпуске проверенную сборку нужно перенести в `plugins/blueprint-plugin`, обновить контрольные суммы и сведения о версии, проверить каталог и опубликовать изменения репозитория marketplace. Автоматическая синхронизация двух репозиториев пока не настроена. Один только ZIP в GitHub Releases не обновляет этот каталог.
+The marketplace branch has `release-lock.json` with each installed package's version, source commit, release tag, platform, archive SHA-256 and file hashes. A single commit changes the catalog, lock and selected package. Snapshot tags such as `marketplace/r0001` identify complete catalog revisions. GitHub's repository-wide `Latest` release is not an update source for an individual plugin.
 
-Бинарные файлы хранятся непосредственно в Git. Текущая сборка меньше лимита GitHub в 100 MiB на файл, но история репозитория будет расти с обновлениями. Git LFS не используется, чтобы установка не зависела от его поддержки клиентом.
+If a run fails after the plugin release but before the catalog update, start the workflow again with the same plugin and version. It verifies the already published asset and completes the catalog update without a new version or build. The old catalog stays available until a replacement is complete. If `main` advances during release preparation, rerun from its new tip; the workflow never overwrites another commit. Published tags/assets are immutable. Roll back a catalog by publishing a new snapshot with the selected older package after reviewing its compatibility; never move published tags.
+
+Initial packages target macOS Apple Silicon. Ready-to-install binaries live in Git history on the `marketplace` branch, so its size grows with releases. The 0.1.2 package predates this pipeline; 0.1.3 is its first release through the monorepo.

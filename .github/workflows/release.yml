@@ -1,0 +1,70 @@
+name: Release plugin
+on:
+  workflow_dispatch:
+    inputs:
+      plugin:
+        description: Plugin ID from plugins.json
+        required: true
+        type: string
+      version:
+        description: New 0.1.N version, or same version to resume
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: cododel-plugin-release
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: macos-15
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    env:
+      RELEASE_PLUGIN: ${{ inputs.plugin }}
+      RELEASE_VERSION: ${{ inputs.version }}
+      RELEASE_BRANCH: ${{ github.event.repository.default_branch }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Resolve new release or resume existing tag
+        id: release
+        run: |
+          bun scripts/ci.ts validate
+          bun scripts/release/run.ts inspect
+      - name: Validate selected source
+        if: steps.release.outputs.done != 'true'
+        run: bun scripts/ci.ts releaseCheck "$RELEASE_PLUGIN"
+      - name: Prepare version commit
+        if: steps.release.outputs.done != 'true'
+        env:
+          RELEASE_BASE: ${{ steps.release.outputs.base }}
+          RELEASE_RESUME: ${{ steps.release.outputs.resume }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          bun scripts/release/run.ts prepare
+      - name: Build selected release
+        if: steps.release.outputs.done != 'true'
+        run: bun scripts/ci.ts releaseBuild "$RELEASE_PLUGIN"
+      - name: Publish release and marketplace
+        if: steps.release.outputs.done != 'true'
+        env:
+          RELEASE_BASE: ${{ steps.release.outputs.base }}
+          RELEASE_RESUME: ${{ steps.release.outputs.resume }}
+        run: |
+          gh auth setup-git --hostname github.com
+          bun scripts/release/run.ts publish
+      - name: Resume marketplace publication
+        if: steps.release.outputs.done == 'true'
+        run: |
+          gh auth setup-git --hostname github.com
+          bun scripts/release/run.ts catalog

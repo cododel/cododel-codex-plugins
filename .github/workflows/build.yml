@@ -1,0 +1,70 @@
+name: Check plugins
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: plugins-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.diff.outputs.matrix }}
+      has_plugins: ${{ steps.diff.outputs.has_plugins }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Validate registry and routing tests
+        run: |
+          bun scripts/ci.ts validate
+          bun test tests/ci.test.ts tests/release.test.ts tests/release-publication.test.ts
+      - name: Find affected plugins
+        id: diff
+        env:
+          CI_PULL_REQUEST: ${{ github.event_name == 'pull_request' }}
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: bun scripts/ci.ts affected "$BASE_SHA" "$HEAD_SHA"
+  check:
+    needs: prepare
+    if: needs.prepare.outputs.has_plugins == 'true'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ runner.arch }}-1.4.2-${{ matrix.plugin }}-${{ hashFiles(format('plugins/{0}/bun.lock', matrix.plugin)) }}
+      - name: Check ${{ matrix.plugin }}
+        run: bun scripts/ci.ts check '${{ matrix.plugin }}'
+  result:
+    if: always()
+    needs: [prepare, check]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require successful checks or empty matrix
+        env:
+          PREPARE: ${{ needs.prepare.result }}
+          CHECK: ${{ needs.check.result }}
+          HAS_PLUGINS: ${{ needs.prepare.outputs.has_plugins }}
+        run: |
+          test "$PREPARE" = success
+          if [ "$HAS_PLUGINS" = true ]; then
+            test "$CHECK" = success
+          else
+            test "$CHECK" = skipped
+          fi

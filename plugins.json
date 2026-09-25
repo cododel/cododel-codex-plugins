@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "plugins": [
+    {
+      "id": "blueprint",
+      "name": "blueprint-plugin",
+      "directory": "plugins/blueprint",
+      "runner": "macos-15",
+      "versionPolicy": "0.1.patch",
+      "sharedInputs": ["scripts/", ".github/workflows/", "plugins.json"],
+      "commands": {
+        "check": [["bun", "install", "--frozen-lockfile"], ["bun", "run", "build"], ["bun", "run", "typecheck"], ["bun", "test", "tests"], ["bunx", "--no-install", "playwright", "install", "chromium"], ["bun", "run", "check:browser"], ["bun", "run", "check:stability"], ["bun", "run", "check:layout"], ["bun", "run", "package"]],
+        "releaseCheck": [["bun", "install", "--frozen-lockfile"], ["bun", "scripts/build.ts", "--web-only"], ["bun", "run", "typecheck"], ["bun", "test", "tests"], ["bunx", "--no-install", "playwright", "install", "chromium"], ["bun", "run", "check:browser"], ["bun", "run", "check:stability"], ["bun", "run", "check:layout"]],
+        "releaseBuild": [["bun", "run", "build"], ["bun", "run", "typecheck"], ["bun", "run", "package"]]
+      }
+    }
+  ]
+}
