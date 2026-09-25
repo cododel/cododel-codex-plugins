@@ -1,3 +1,4 @@
+import { findRelease } from "../scripts/release/github";
 import { test, expect } from "bun:test";
 import {
   publishDraft,
@@ -55,4 +56,24 @@ test("lookup failure never creates a competing release", async () => {
     }),
   ).rejects.toThrow("503");
   expect(writes).toBe(0);
+});
+
+test("authenticated release listing finds a draft by tag", async () => {
+  const calls: string[] = [];
+  const fetcher = async (input: string) => {
+    calls.push(String(input));
+    return new Response(JSON.stringify([
+      { tag_name: "other/v1", draft: false, html_url: "https://example.invalid/other" },
+      { tag_name: "blueprint/v0.1.3", draft: true, html_url: "https://example.invalid/draft" },
+    ]));
+  };
+  expect(await findRelease("cododel/repo", "blueprint/v0.1.3", "token", fetcher)).toEqual({
+    draft: true,
+    html_url: "https://example.invalid/draft",
+  });
+  expect(calls).toEqual(["https://api.github.com/repos/cododel/repo/releases?per_page=100&page=1"]);
+});
+test("release list errors stop publication", async () => {
+  const fetcher = async () => new Response("Forbidden", { status: 403 });
+  await expect(findRelease("cododel/repo", "blueprint/v0.1.3", "token", fetcher)).rejects.toThrow("HTTP 403");
 });

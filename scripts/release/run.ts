@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { plugin, root } from "../registry";
 import { git, compare, prepare, pushRelease, tag, verifyRelease, versions } from "./git";
 import { publishCatalog, sha } from "./catalog";
+import { findRelease } from "./github";
 const id=process.env.RELEASE_PLUGIN??"", version=process.env.RELEASE_VERSION??"", p=plugin(id);
 tag(p,version);
 const repo=process.env.GITHUB_REPOSITORY??"", branch=process.env.RELEASE_BRANCH??"";
@@ -13,13 +14,7 @@ if (git(root,"remote","get-url","origin").replace(/\.git$/,"")!==`https://github
 const releaseTag=tag(p,version);
 function output(name:string,value:string) { if(!process.env.GITHUB_OUTPUT) throw new Error("Missing GITHUB_OUTPUT");appendFileSync(process.env.GITHUB_OUTPUT,`${name}=${value}\n`); }
 function gh(...args:string[]) { return execFileSync("gh",args,{cwd:root,encoding:"utf8",stdio:["ignore","pipe","pipe"]}).trim(); }
-async function lookup() {
-  const result=await fetch(`https://api.github.com/repos/${repo}/releases/tags/${releaseTag}`,{headers:{Authorization:`Bearer ${process.env.GH_TOKEN}`,Accept:"application/vnd.github+json"}});
-  if(result.status===404)return null;
-  if(!result.ok)throw new Error(`Release lookup HTTP ${result.status}`);
-  const data=await result.json();if(typeof data.draft!=="boolean" || typeof data.html_url!=="string")throw new Error("Bad release response");
-  return data as {draft:boolean;html_url:string};
-}
+function lookup() { return findRelease(repo, releaseTag, process.env.GH_TOKEN ?? ""); }
 function archive() { return resolve(root,p.directory,"dist",`${p.name}-macos-arm64.zip`); }
 function verifyArchive(path:string) {
   const checksum=readFileSync(`${path}.sha256`,"utf8"), digest=sha(readFileSync(path));
