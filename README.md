@@ -1,41 +1,5 @@
 # Cododel marketplace
 
-Каталог плагинов для Codex. Пакеты хранятся в `plugins/`, индекс — в `.agents/plugins/marketplace.json`.
+Connect Codex to `git@github.com:cododel/cododel-codex-plugins.git` with Git ref `marketplace`. Install `blueprint-plugin` from the Cododel marketplace. This branch contains release packages; source and CI are on `main`.
 
-## Подключение
-
-В Codex откройте **Add plugin marketplace** и укажите в **Source** абсолютный путь к этой папке. Для текущего локального каталога:
-
-```text
-/Users/cododel/Projects/cododel-codex-plugins
-```
-
-Затем установите **Blueprint** из marketplace **Cododel**. Это отдельный источник от ранее загруженного ZIP; облачная карточка ZIP этим каталогом не управляется.
-
-Для подключения из GitHub укажите Source `git@github.com:cododel/cododel-codex-plugins.git` и Git ref `main`. Репозиторий: https://github.com/cododel/cododel-codex-plugins.
-
-## Пакеты
-
-| Плагин | Версия | Платформа |
-| --- | --- | --- |
-| Blueprint (`blueprint-plugin`) | 0.1.2 | macOS Apple Silicon (arm64) |
-
-В пакет включён executable с Bun и готовый интерфейс. Пользователю не нужно устанавливать Node.js, Bun или npm-зависимости. Intel macOS, Linux и Windows этой сборкой не поддерживаются.
-
-## Проверка
-
-Из корня каталога:
-
-```sh
-python3 scripts/validate.py
-```
-
-Проверка сверяет структуру каталога, конфигурацию MCP, исполняемый файл и SHA-256 всех файлов пакетов. Контрольные суммы фиксируют состав сборки; они не являются цифровой подписью.
-
-## Публикация обновлений
-
-Исходники Blueprint и его release workflow находятся в отдельном проекте. Этот каталог содержит готовые пакеты для установки. Версия меняется при выпуске релиза, а не при каждом коммите разработки.
-
-При выпуске проверенную сборку нужно перенести в `plugins/blueprint-plugin`, обновить контрольные суммы и сведения о версии, проверить каталог и опубликовать изменения репозитория marketplace. Автоматическая синхронизация двух репозиториев пока не настроена. Один только ZIP в GitHub Releases не обновляет этот каталог.
-
-Бинарные файлы хранятся непосредственно в Git. Текущая сборка меньше лимита GitHub в 100 MiB на файл, но история репозитория будет расти с обновлениями. Git LFS не используется, чтобы установка не зависела от его поддержки клиентом.
+Snapshot 1 is described by `release-lock.json`. GitHub Releases provide per-plugin ZIP archives; Codex installs the folders listed in `.agents/plugins/marketplace.json`.

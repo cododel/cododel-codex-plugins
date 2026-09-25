@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "snapshot": 1,
+  "plugins": {
+    "blueprint": {
+      "name": "blueprint-plugin",
+      "version": "0.1.3",
+      "sourceCommit": "e0c4babbc8d4c76fc855614a01cdd4952faeb3c1",
+      "sourceTag": "blueprint/v0.1.3",
+      "platform": "macos-arm64",
+      "archiveSha256": "e017760c338fad75ebbd8c0dfbcc860150ee199968325d400f986040a8359bce",
+      "files": {
+        ".codex-plugin/plugin.json": "93c8f61aaec47eef8ea6290c8a0d87a065733373d88f09b29bf54f0e061e6d56",
+        ".mcp.json": "dfbe70883204ce26ccbf48336f67f07c608ea272d40f492d35650f563e715382",
+        "README.md": "001d476fbb479944e6eb25443ec57ada7f28e45588448d7c0180c1048f4dc190",
+        "VALIDATION.md": "6807fab134bdede052b5247d685fda3da5c76cdc94d6a3bef15d0b07097ed931",
+        "bin/blueprint": "2c932bb9b9e28ba3a3c044647237ec611819f83234ca9b220775859bb48bd193",
+        "skills/blueprint/SKILL.md": "3249e2a9126776b815d9fad0b28d2c2a543bf70424994a410c953bf08428c414",
+        "skills/blueprint/references/custom.md": "5ad72d4912ab0f320b1eab5e547fd98c628610de9842968fcae8a188848f9720"
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 {
   "name": "blueprint-plugin",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Stateful MDX artifacts with operator answers, agent discussions and revision history",
   "author": {
     "name": "cododel"
@@ -12,8 +12,13 @@
     "longDescription": "Create project-local MDX plans, save widget answers, discuss anchored annotations, and review revisions with Codex.",
     "developerName": "cododel",
     "category": "Productivity",
-    "capabilities": ["Interactive", "Write"],
-    "defaultPrompt": ["Create an interactive blueprint for this project."]
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Create an interactive blueprint for this project."
+    ]
   },
   "mcpServers": "./.mcp.json"
 }

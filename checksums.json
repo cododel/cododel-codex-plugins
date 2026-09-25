@@ -1,9 +1,9 @@
 {
-  "plugins/blueprint-plugin/.codex-plugin/plugin.json": "057ee28f27a712c5b890885051bfa2ae44f32b5cad1fd2aafca4b50b1c42788a",
+  "plugins/blueprint-plugin/.codex-plugin/plugin.json": "93c8f61aaec47eef8ea6290c8a0d87a065733373d88f09b29bf54f0e061e6d56",
   "plugins/blueprint-plugin/.mcp.json": "dfbe70883204ce26ccbf48336f67f07c608ea272d40f492d35650f563e715382",
-  "plugins/blueprint-plugin/README.md": "265ca49cdf5ed27c4cd51c40ad00892c7293dec1df60d2a9e35554187959c995",
+  "plugins/blueprint-plugin/README.md": "001d476fbb479944e6eb25443ec57ada7f28e45588448d7c0180c1048f4dc190",
   "plugins/blueprint-plugin/VALIDATION.md": "6807fab134bdede052b5247d685fda3da5c76cdc94d6a3bef15d0b07097ed931",
-  "plugins/blueprint-plugin/bin/blueprint": "8d804e2a0a76f2d25f7697beee46fb3a1623a987cca80473ce3c9ce42e302470",
+  "plugins/blueprint-plugin/bin/blueprint": "2c932bb9b9e28ba3a3c044647237ec611819f83234ca9b220775859bb48bd193",
   "plugins/blueprint-plugin/skills/blueprint/SKILL.md": "3249e2a9126776b815d9fad0b28d2c2a543bf70424994a410c953bf08428c414",
   "plugins/blueprint-plugin/skills/blueprint/references/custom.md": "5ad72d4912ab0f320b1eab5e547fd98c628610de9842968fcae8a188848f9720"
 }
