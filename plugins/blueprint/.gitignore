@@ -1,0 +1,8 @@
+/.tmp/
+/node_modules/
+/dist/
+/src/generated/
+/playwright-report/
+/test-results/
+.DS_Store
+/blueprints/

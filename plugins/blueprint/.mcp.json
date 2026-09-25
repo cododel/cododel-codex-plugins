@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "blueprint": { "command": "${PLUGIN_ROOT}/bin/blueprint", "args": ["mcp"] }
+  }
+}

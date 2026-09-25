@@ -1,0 +1,59 @@
+name: Build plugin
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blueprint-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos-arm64:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Check architecture
+        run: test "$(uname -m)" = arm64
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Build executable and frontend
+        run: bun run build
+      - name: Check types
+        run: bun run typecheck
+      - name: Run tests
+        run: bun test
+      - name: Install test browser
+        run: bunx --no-install playwright install chromium
+      - name: Check browser interaction
+        run: bun run check:browser
+      - name: Check save stability and stateful changes
+        run: bun run check:stability
+      - name: Check responsive document and widget sizes
+        run: bun run check:layout
+      - name: Package ZIP and check extracted executable
+        run: bun run package
+      - name: Upload installable ZIP
+        uses: actions/upload-artifact@v7
+        with:
+          path: dist/blueprint-plugin-macos-arm64.zip
+          archive: false
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload checksum
+        uses: actions/upload-artifact@v7
+        with:
+          path: dist/blueprint-plugin-macos-arm64.zip.sha256
+          archive: false
+          if-no-files-found: error
+          retention-days: 14

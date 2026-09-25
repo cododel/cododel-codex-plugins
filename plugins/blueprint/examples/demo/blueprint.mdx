@@ -1,0 +1,39 @@
+import Scope from './widgets/scope.tsx'
+
+# Blueprint playground
+
+An interactive plan for testing Blueprint itself. Explore the choices below, leave a comment on any paragraph, then ask the agent in chat to read your changes.
+
+## 1. Choose the next experiment
+
+<Question id="next-experiment" title="What should we test next?" options={["Revision review", "Custom widgets", "Annotation workflow"]} />
+
+<Question id="success" title="What would make planning feel better?" />
+
+## 2. Compare the options
+
+<Comparison id="options" columns={["Experiment", "What you will try", "What we will learn"]} rows={[["Revision review", "Keep an old revision open while a new one arrives", "Whether changes are easy to follow"],["Custom widgets", "Adjust scope and inspect the saved snapshot", "Whether richer answers are useful"],["Annotations", "Select a sentence and describe a change", "Whether comments keep enough context"]]} />
+
+## 3. Shape a small iteration
+
+Adjust the controls. The estimate below is a demo calculation, not a delivery commitment. Widget state is saved without calling the model.
+
+<Custom id="scope-block"><Scope id="scope" /></Custom>
+
+## 4. Leave a precise annotation
+
+The first version should focus on a clear feedback loop: read the plan, answer questions, leave contextual comments, and continue the discussion with the agent in chat.
+
+Select part of the paragraph above and explain what you would change. The sidebar should show the selected quote and your comment.
+
+## 5. Check the interaction
+
+<Checklist id="checks" title="Things to try" items={["Answer a question", "Move the scope slider", "Annotate a sentence", "Reload and check saved answers", "Ask the agent to read the artifact"]} />
+
+<Diagram id="feedback-flow" nodes={[{id:"plan",label:"Read the blueprint"},{id:"answer",label:"Answer and annotate"},{id:"send",label:"Continue in chat"},{id:"revise",label:"Review the next revision"}]} edges={[["plan","answer"],["answer","send"],["send","revise"]]} />
+
+## Review together
+
+Answers and saved annotations already belong to this artifact. Ask the agent in chat to read your changes when you are ready.
+
+Save an annotation as a draft while you are thinking, then open it for review. The agent can reply and propose a resolution; you decide when the discussion is resolved or archived. **Approve revision** records agreement with the whole plan and does not start implementation.
