@@ -66,6 +66,7 @@ test("marketplace publishes one package and replays without rebuilding others",(
   expect(git(root,"ls-remote","origin","refs/tags/marketplace/r0001")).not.toBe("");
   const checkout=join(f.dir,"inspect");git(root,"worktree","add","--detach",checkout,"origin/marketplace");
   expect(validate(checkout).plugins.blueprint.version).toBe("0.1.3");
+  expect(readFileSync(join(checkout,"README.md"),"utf8")).toContain("blob/main/docs/agent-install.md");
   const firstFiles=readFileSync(join(checkout,"plugins/blueprint-plugin/bin/blueprint"));
   git(root,"worktree","remove","--force",checkout);
   const second=archive(f.dir,journal,"0.1.3");

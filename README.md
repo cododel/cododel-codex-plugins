@@ -6,6 +6,8 @@ This repository develops and publishes Codex plugins. `main` contains source and
 
 In Codex **Add plugin marketplace**, set Source to `git@github.com:cododel/cododel-codex-plugins.git`, Git ref to `marketplace`, and leave Sparse paths empty. The marketplace name remains `cododel`; Blueprint's plugin name remains `blueprint-plugin`.
 
+Agents receiving a repository link and an installation request should follow [the agent installation and operator-reply guide](docs/agent-install.md).
+
 Existing installs that used Git ref `main` need a one-time switch to `marketplace`. Refresh or reinstall the plugin using Codex's normal plugin interface, then test it in a new task. The original standalone Blueprint repository remains available as historical source; ongoing changes belong here.
 
 ## Develop
