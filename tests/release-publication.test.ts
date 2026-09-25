@@ -77,3 +77,21 @@ test("release list errors stop publication", async () => {
   const fetcher = async () => new Response("Forbidden", { status: 403 });
   await expect(findRelease("cododel/repo", "blueprint/v0.1.3", "token", fetcher)).rejects.toThrow("HTTP 403");
 });
+
+test("published release wins over a duplicate draft with the same tag", async () => {
+  const fetcher = async () => new Response(JSON.stringify([
+    { tag_name: "blueprint/v0.1.3", draft: true, html_url: "https://example.invalid/untagged" },
+    { tag_name: "blueprint/v0.1.3", draft: false, html_url: "https://example.invalid/published" },
+  ]));
+  expect(await findRelease("cododel/repo", "blueprint/v0.1.3", "token", fetcher)).toEqual({
+    draft: false,
+    html_url: "https://example.invalid/published",
+  });
+});
+test("ambiguous drafts cannot be selected for publication", async () => {
+  const fetcher = async () => new Response(JSON.stringify([
+    { tag_name: "blueprint/v0.1.3", draft: true, html_url: "https://example.invalid/a" },
+    { tag_name: "blueprint/v0.1.3", draft: true, html_url: "https://example.invalid/b" },
+  ]));
+  await expect(findRelease("cododel/repo", "blueprint/v0.1.3", "token", fetcher)).rejects.toThrow("Ambiguous");
+});
